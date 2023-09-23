@@ -52,20 +52,20 @@ class ShowArticle(Resource):
     
 class Login(Resource):
 
-    def get(self):
-        user = User.query.filter(User.id == session.get('user_id')).first()
-        if user:
-            return jsonify(user.to_dict())
-        else:
-            return jsonify({'message': '401: Not Authorized'}), 401
-
     def post(self):
-        user = User.query.filter(
-            User.username == request.get_json()['username']
-        ).first()
+        request_data = request.get_json()
+        username = request_data.get('username')
 
-        session['user_id'] = user.id
-        return jsonify(user.to_dict())
+        if username:
+            user = User.query.filter(User.username == username).first()
+
+            if user:
+                session['user_id'] = user.id
+                return user.to_dict(), 200
+            else:
+                return {'message': 'User not found'}, 404
+        else:
+            return {'message': 'Username not provided'}, 400
     
 class Logout(Resource):
     
